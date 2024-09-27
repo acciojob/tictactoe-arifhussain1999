@@ -36,7 +36,7 @@ cells.forEach(cell => {
 
             // Check for winner
             if (checkWinner()) {
-                messageDiv.textContent = `${currentPlayer === 'X' ? players.player1 : players.player2}, congratulations you won!`;
+                messageDiv.textContent = `${currentPlayer === 'X' ? players.player1 : players.player2} congratulations you won!`; // Updated winner message format
                 disableBoard(); // Disable the board after a win
             } else {
                 // Switch player
