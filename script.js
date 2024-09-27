@@ -1,61 +1,68 @@
-//your JS code here. If required.
-document.getElementById('submit').addEventListener('click', function() {
-    const player1 = document.getElementById('player1').value;
-    const player2 = document.getElementById('player2').value;
-    
+// Get references to HTML elements
+const player1Input = document.getElementById('player1');
+const player2Input = document.getElementById('player2');
+const submitButton = document.getElementById('submit');
+const gameBoard = document.getElementById('game-board');
+const messageDiv = document.querySelector('.message');
+const cells = document.querySelectorAll('.cell');
+
+let currentPlayer = 'X';
+let players = { player1: '', player2: '' };
+let board = Array(9).fill(null);
+
+// Show the Tic Tac Toe board and update player names
+submitButton.addEventListener('click', () => {
+    const player1 = player1Input.value.trim();
+    const player2 = player2Input.value.trim();
+
     if (player1 && player2) {
-        startGame(player1, player2);
+        players.player1 = player1;
+        players.player2 = player2;
+        document.getElementById('player-setup').style.display = 'none';
+        gameBoard.style.display = 'block';
+        messageDiv.textContent = `${players.player1}, you're up!`;
     } else {
-        alert('Please enter names for both players');
+        alert('Please enter names for both players.');
     }
 });
 
-function startGame(player1, player2) {
-    document.getElementById('player-setup').style.display = 'none';
-    document.getElementById('game-board').style.display = 'block';
-    
-    let currentPlayer = player1;
-    let isGameOver = false;
-    const board = Array(9).fill(null);
-    
-    const messageDiv = document.querySelector('.message');
-    messageDiv.textContent = `${currentPlayer}, you're up!`;
-    
-    const cells = document.querySelectorAll('.cell');
-    cells.forEach(cell => {
-        cell.addEventListener('click', function() {
-            const index = this.id - 1;
-            if (!board[index] && !isGameOver) {
-                board[index] = currentPlayer === player1 ? 'X' : 'O';
-                this.textContent = board[index];
-                
-                if (checkWinner(board)) {
-                    messageDiv.textContent = `${currentPlayer}, congratulations you won!`;
-                    isGameOver = true;
-                } else if (board.every(cell => cell)) {
-                    messageDiv.textContent = 'It\'s a tie!';
-                    isGameOver = true;
-                } else {
-                    currentPlayer = currentPlayer === player1 ? player2 : player1;
-                    messageDiv.textContent = `${currentPlayer}, you're up!`;
-                }
+// Handle cell click events for making moves
+cells.forEach(cell => {
+    cell.addEventListener('click', function () {
+        const index = this.id - 1; // Cell IDs are 1-9, index is 0-8
+        if (!board[index]) { // Ensure cell is empty before placing a mark
+            board[index] = currentPlayer;
+            this.textContent = currentPlayer === 'X' ? 'x' : 'o'; // Set cell content
+
+            // Check for winner
+            if (checkWinner()) {
+                messageDiv.textContent = `${currentPlayer === 'X' ? players.player1 : players.player2}, congratulations you won!`;
+                disableBoard(); // Disable the board after a win
+            } else {
+                // Switch player
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                messageDiv.textContent = `${currentPlayer === 'X' ? players.player1 : players.player2}, you're up!`;
             }
-        });
+        }
+    });
+});
+
+// Check if a player has won
+function checkWinner() {
+    const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6] // Diagonals
+    ];
+    return winningCombinations.some(combination => {
+        const [a, b, c] = combination;
+        return board[a] && board[a] === board[b] && board[a] === board[c];
     });
 }
 
-function checkWinner(board) {
-    const winningCombinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],  // Rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],  // Columns
-        [0, 4, 8], [2, 4, 6]              // Diagonals
-    ];
-    
-    for (let combination of winningCombinations) {
-        const [a, b, c] = combination;
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-            return true;
-        }
-    }
-    return false;
+// Disable the board after a player wins
+function disableBoard() {
+    cells.forEach(cell => {
+        cell.removeEventListener('click', arguments.callee);
+    });
 }
